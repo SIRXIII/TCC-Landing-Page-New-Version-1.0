@@ -6,21 +6,9 @@
     <title>Travel Clothing Club</title>
     <script type="module" crossorigin src="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-OC3gjTIm.js"></script>
     <link rel="stylesheet" crossorigin href="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-Czm9hCN7.css">
-    <style>
-        /* Ensure logo link aligns content vertically */
-        nav a:first-child { display: flex; align-items: center; min-height: 40px; }
-        /* Style for JS-injected text logo */
-        .tcc-text-logo {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            font-style: italic;
-            font-size: 1rem;
-            letter-spacing: 0.05em;
-            color: #1a1a1a;
-            white-space: nowrap;
-        }
-    </style>
     <script>
-        var editorialImages = [
+        // Curated travel images for editorial sections
+        var tccImages = [
             'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=85',
             'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&q=85',
             'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=900&q=85',
@@ -29,50 +17,40 @@
             'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=900&q=85',
             'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=900&q=85'
         ];
-        var imgIdx = 0;
+        var tccIdx = 0;
 
-        function handleBrokenImg(img) {
-            if (img._tccFixed) return;
-            img._tccFixed = true;
-
-            var isNavOrLogo = img.closest('nav') || img.closest('header') ||
-                              (img.alt && img.alt.toLowerCase().includes('luxury')) ||
-                              (img.alt && img.alt.toLowerCase().includes('travel clothing'));
-
-            if (isNavOrLogo) {
-                // Replace broken logo img with branded text
-                img.style.display = 'none';
-                if (!img.parentNode.querySelector('.tcc-text-logo')) {
-                    var span = document.createElement('span');
-                    span.className = 'tcc-text-logo';
-                    span.textContent = 'Travel Clothing Club';
-                    img.parentNode.insertBefore(span, img.nextSibling);
-                }
-            } else {
-                // Replace with Unsplash editorial image
-                img.src = editorialImages[imgIdx % editorialImages.length];
-                imgIdx++;
-            }
-        }
-
-        function applyFixes() {
+        function fixBrokenImages() {
             document.querySelectorAll('img').forEach(function(img) {
-                if (!img._tccListening) {
-                    img._tccListening = true;
-                    img.addEventListener('error', function() { handleBrokenImg(img); });
-                    // Check if already broken
-                    if (img.complete && img.naturalWidth === 0 && img.src && !img.src.startsWith('data:') && img.src !== window.location.href) {
-                        handleBrokenImg(img);
+                if (img._tccDone) return;
+                img._tccDone = true;
+                img.addEventListener('error', function() {
+                    if (img._tccDone2) return;
+                    img._tccDone2 = true;
+                    // For logo/nav images: just hide them (nav already shows text logo)
+                    // For all others: show a travel photo
+                    var inNav = img.closest('nav') || img.closest('header');
+                    var isLogo = img.alt && (img.alt.toLowerCase().includes('luxury') || img.alt.toLowerCase().includes('logo'));
+                    if (inNav || isLogo) {
+                        img.style.display = 'none';
+                    } else {
+                        img.src = tccImages[tccIdx % tccImages.length];
+                        tccIdx++;
                     }
+                });
+                if (img.complete && img.naturalWidth === 0 && img.src &&
+                    img.src.indexOf('data:') !== 0 && img.src !== location.href) {
+                    img.dispatchEvent(new Event('error'));
                 }
             });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            applyFixes();
-            setTimeout(applyFixes, 600);
-            setTimeout(applyFixes, 2000);
-            new MutationObserver(applyFixes).observe(document.documentElement, { childList: true, subtree: true });
+            fixBrokenImages();
+            setTimeout(fixBrokenImages, 500);
+            setTimeout(fixBrokenImages, 2000);
+            new MutationObserver(fixBrokenImages).observe(document.body || document.documentElement, {
+                childList: true, subtree: true
+            });
         });
     </script>
 </head>
