@@ -7,17 +7,16 @@
     <script type="module" crossorigin src="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-OC3gjTIm.js"></script>
     <link rel="stylesheet" crossorigin href="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-Czm9hCN7.css">
     <style>
-        /* Hide broken logo images - app already shows text fallback */
-        nav img[alt*="logo"], nav img[alt*="Logo"],
-        nav img[src*="ibb.co"], nav img[src*="placeholder"],
-        .hero-logo img, .footer-logo img {
-            display: none !important;
-        }
-        /* Ensure nav logo area looks clean */
-        nav a:first-child {
-            min-height: 40px;
-            display: flex;
-            align-items: center;
+        /* Ensure logo link aligns content vertically */
+        nav a:first-child { display: flex; align-items: center; min-height: 40px; }
+        /* Style for JS-injected text logo */
+        .tcc-text-logo {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-style: italic;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+            color: #1a1a1a;
+            white-space: nowrap;
         }
     </style>
     <script>
@@ -32,37 +31,48 @@
         ];
         var imgIdx = 0;
 
-        function applyImageFixes() {
-            var allImgs = document.querySelectorAll('img');
-            allImgs.forEach(function(img) {
-                if (!img._fixApplied) {
-                    img._fixApplied = true;
-                    img.addEventListener('error', function() {
-                        var isLogo = img.alt && (img.alt.toLowerCase().includes('logo') || img.alt.toLowerCase().includes('travel clothing club') || img.alt.toLowerCase().includes('luxury'));
-                        var isInNav = img.closest('nav') || img.closest('[class*="nav"]');
-                        if (isLogo || isInNav) {
-                            img.style.display = 'none';
-                        } else {
-                            img.src = editorialImages[imgIdx % editorialImages.length];
-                            imgIdx++;
-                        }
-                    });
-                    if (img.complete && img.naturalWidth === 0 && img.src && img.src !== window.location.href) {
-                        img.dispatchEvent(new Event('error'));
+        function handleBrokenImg(img) {
+            if (img._tccFixed) return;
+            img._tccFixed = true;
+
+            var isNavOrLogo = img.closest('nav') || img.closest('header') ||
+                              (img.alt && img.alt.toLowerCase().includes('luxury')) ||
+                              (img.alt && img.alt.toLowerCase().includes('travel clothing'));
+
+            if (isNavOrLogo) {
+                // Replace broken logo img with branded text
+                img.style.display = 'none';
+                if (!img.parentNode.querySelector('.tcc-text-logo')) {
+                    var span = document.createElement('span');
+                    span.className = 'tcc-text-logo';
+                    span.textContent = 'Travel Clothing Club';
+                    img.parentNode.insertBefore(span, img.nextSibling);
+                }
+            } else {
+                // Replace with Unsplash editorial image
+                img.src = editorialImages[imgIdx % editorialImages.length];
+                imgIdx++;
+            }
+        }
+
+        function applyFixes() {
+            document.querySelectorAll('img').forEach(function(img) {
+                if (!img._tccListening) {
+                    img._tccListening = true;
+                    img.addEventListener('error', function() { handleBrokenImg(img); });
+                    // Check if already broken
+                    if (img.complete && img.naturalWidth === 0 && img.src && !img.src.startsWith('data:') && img.src !== window.location.href) {
+                        handleBrokenImg(img);
                     }
                 }
             });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            applyImageFixes();
-            setTimeout(applyImageFixes, 800);
-            setTimeout(applyImageFixes, 2500);
-            // Watch for React dynamic renders
-            var observer = new MutationObserver(function() {
-                applyImageFixes();
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
+            applyFixes();
+            setTimeout(applyFixes, 600);
+            setTimeout(applyFixes, 2000);
+            new MutationObserver(applyFixes).observe(document.documentElement, { childList: true, subtree: true });
         });
     </script>
 </head>
