@@ -7,7 +7,6 @@
     <script type="module" crossorigin src="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-OC3gjTIm.js"></script>
     <link rel="stylesheet" crossorigin href="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-Czm9hCN7.css">
     <script>
-        // Curated travel images for editorial sections
         var tccImages = [
             'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=85',
             'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&q=85',
@@ -19,38 +18,46 @@
         ];
         var tccIdx = 0;
 
-        function fixBrokenImages() {
-            document.querySelectorAll('img').forEach(function(img) {
-                if (img._tccDone) return;
-                img._tccDone = true;
-                img.addEventListener('error', function() {
-                    if (img._tccDone2) return;
-                    img._tccDone2 = true;
-                    // For logo/nav images: just hide them (nav already shows text logo)
-                    // For all others: show a travel photo
-                    var inNav = img.closest('nav') || img.closest('header');
-                    var isLogo = img.alt && (img.alt.toLowerCase().includes('luxury') || img.alt.toLowerCase().includes('logo'));
-                    if (inNav || isLogo) {
-                        img.style.display = 'none';
-                    } else {
-                        img.src = tccImages[tccIdx % tccImages.length];
-                        tccIdx++;
-                    }
-                });
-                if (img.complete && img.naturalWidth === 0 && img.src &&
-                    img.src.indexOf('data:') !== 0 && img.src !== location.href) {
-                    img.dispatchEvent(new Event('error'));
+        function isLogoImage(img) {
+            var alt = (img.alt || '').toLowerCase();
+            return alt.includes('travel clothing') ||
+                   alt.includes('luxury') ||
+                   alt.includes('logo') ||
+                   !!img.closest('nav') ||
+                   !!img.closest('header');
+        }
+
+        function fixImg(img) {
+            if (img._tccDone) return;
+            img._tccDone = true;
+            img.addEventListener('error', function() {
+                if (img._tccFixed) return;
+                img._tccFixed = true;
+                if (isLogoImage(img)) {
+                    img.style.display = 'none';
+                } else {
+                    img.src = tccImages[tccIdx % tccImages.length];
+                    tccIdx++;
                 }
             });
+            if (img.complete && img.naturalWidth === 0 && img.src &&
+                img.src.indexOf('data:') !== 0 && img.src !== location.href) {
+                img.dispatchEvent(new Event('error'));
+            }
+        }
+
+        function fixAll() {
+            document.querySelectorAll('img').forEach(fixImg);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            fixBrokenImages();
-            setTimeout(fixBrokenImages, 500);
-            setTimeout(fixBrokenImages, 2000);
-            new MutationObserver(fixBrokenImages).observe(document.body || document.documentElement, {
-                childList: true, subtree: true
-            });
+            fixAll();
+            setTimeout(fixAll, 500);
+            setTimeout(fixAll, 2000);
+            new MutationObserver(fixAll).observe(
+                document.body || document.documentElement,
+                { childList: true, subtree: true }
+            );
         });
     </script>
 </head>
