@@ -1,13 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Travel Clothing Club</title>
     <script type="module" crossorigin src="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-OC3gjTIm.js"></script>
     <link rel="stylesheet" crossorigin href="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-Czm9hCN7.css">
-  </head>
-  <body>
+    <style>
+        /* Logo overlay and Image fixes */
+        .hero-logo img, .footer-logo img, nav img {
+            content: url("https://i.ibb.co/XfXkX6r/TCC-Cursive.jpg");
+        }
+        /* Fallback for missing editorial images */
+        .img-editorial {
+            background-color: #e8e8e8;
+            position: relative;
+        }
+        .img-editorial::after {
+            content: 'TCC Luxury';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: serif;
+            color: #b88a53;
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
     <div id="root"></div>
-  </body>
+</body>
 </html>
