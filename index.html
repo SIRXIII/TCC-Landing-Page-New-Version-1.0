@@ -6,6 +6,15 @@
     <title>Travel Clothing Club</title>
     <script type="module" crossorigin src="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-OC3gjTIm.js"></script>
     <link rel="stylesheet" crossorigin href="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-Czm9hCN7.css">
+    <style>
+        .tcc-logo-text {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+            color: inherit;
+        }
+    </style>
     <script>
         var tccImages = [
             'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=85',
@@ -20,11 +29,19 @@
 
         function isLogoImage(img) {
             var alt = (img.alt || '').toLowerCase();
-            return alt.includes('travel clothing') ||
+            return alt === 'travel clothing club' ||
                    alt.includes('luxury') ||
-                   alt.includes('logo') ||
-                   !!img.closest('nav') ||
-                   !!img.closest('header');
+                   alt.includes('logo');
+        }
+
+        function replaceWithLogoText(img) {
+            img.style.display = 'none';
+            if (!img.parentNode.querySelector('.tcc-logo-text')) {
+                var span = document.createElement('span');
+                span.className = 'tcc-logo-text';
+                span.textContent = img.alt || 'Travel Clothing Club';
+                img.parentNode.insertBefore(span, img);
+            }
         }
 
         function fixImg(img) {
@@ -34,7 +51,7 @@
                 if (img._tccFixed) return;
                 img._tccFixed = true;
                 if (isLogoImage(img)) {
-                    img.style.display = 'none';
+                    replaceWithLogoText(img);
                 } else {
                     img.src = tccImages[tccIdx % tccImages.length];
                     tccIdx++;
