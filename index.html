@@ -7,27 +7,105 @@
     <script type="module" crossorigin src="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-OC3gjTIm.js"></script>
     <link rel="stylesheet" crossorigin href="https://p-bielqopjmcnjqaakccal3a6naynae5ru.ok.kimi.link/assets/index-Czm9hCN7.css">
     <style>
-        /* Logo overlay and Image fixes */
+        /* ===== LOGO OVERRIDE ===== */
+        /* Hide broken img tags in logo areas */
         .hero-logo img, .footer-logo img, nav img {
-            content: url("https://i.ibb.co/XfXkX6r/TCC-Cursive.jpg");
+            display: none !important;
         }
-        /* Fallback for missing editorial images */
-        .img-editorial {
-            background-color: #e8e8e8;
+        /* Replace with CSS text logo */
+        .hero-logo::after, .footer-logo::after, nav a:first-of-type::after {
+            content: 'Travel Clothing Club';
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.1rem;
+            font-style: italic;
+            letter-spacing: 0.05em;
+            color: #1a1a1a;
+            display: inline-block;
+        }
+        /* If logo uses a specific class with background image */
+        [class*="logo"] {
+            min-width: 120px;
+            min-height: 40px;
+        }
+        /* ===== COLLECTION IMAGES FIX ===== */
+        .img-editorial, [class*="editorial"], [class*="collection"] img, section img {
             position: relative;
         }
-        .img-editorial::after {
-            content: 'TCC Luxury';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: serif;
-            color: #b88a53;
-            font-size: 1.2rem;
-            opacity: 0.5;
+        /* Resort Collection */
+        [data-collection="resort"] img,
+        .collection-resort img {
+            content: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80');
+        }
+        /* Style pack images */
+        .img-editorial:not([src]):not([style*="background"]) {
+            background-image: url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80') !important;
+            background-size: cover;
+            background-position: center;
+        }
+        /* Fix ALL broken images on page */
+        img:not([src]), img[src=""], img[src*="placeholder"] {
+            display: none;
         }
     </style>
+    <script>
+        // Fix broken images after React mounts
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                fixImages();
+                fixLogo();
+            }, 500);
+            setTimeout(function() {
+                fixImages();
+                fixLogo();
+            }, 2000);
+        });
+
+        function fixLogo() {
+            // Find all nav/header logo images and hide broken ones
+            var logoImgs = document.querySelectorAll('nav img, header img, [class*="logo"] img, .hero img:first-child');
+            logoImgs.forEach(function(img) {
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    // Add text sibling
+                    var span = document.createElement('span');
+                    span.style.cssText = 'font-family:Georgia,serif;font-style:italic;font-size:1.1rem;letter-spacing:0.05em;color:#1a1a1a;';
+                    span.textContent = 'Travel Clothing Club';
+                    if (!this.parentNode.querySelector('.tcc-logo-text')) {
+                        span.className = 'tcc-logo-text';
+                        this.parentNode.insertBefore(span, this.nextSibling);
+                    }
+                };
+                if (img.complete && img.naturalWidth === 0) {
+                    img.onerror();
+                }
+            });
+        }
+
+        function fixImages() {
+            // High-quality travel images for editorial sections
+            var editorialImages = [
+                'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80',
+                'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80',
+                'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80'
+            ];
+            var idx = 0;
+            var allImgs = document.querySelectorAll('img');
+            allImgs.forEach(function(img) {
+                // Skip logo images
+                if (img.closest('nav') || img.closest('header') || (img.className && img.className.includes('logo'))) return;
+                img.onerror = function() {
+                    if (idx < editorialImages.length) {
+                        this.src = editorialImages[idx % editorialImages.length];
+                        idx++;
+                    }
+                };
+                if (img.complete && img.naturalWidth === 0 && img.src) {
+                    img.onerror();
+                }
+            });
+        }
+    </script>
 </head>
 <body>
     <div id="root"></div>
